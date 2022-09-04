@@ -86,7 +86,7 @@ void	Command::nick(std::vector<std::string> s, Client *client)
 
 	std::vector<std::string> participatingChannelName = client->getMyChannelList();
 	makeCommandReply(client->getClientFd(), "NICK", s[1]);
-	if (particiipatingChannelName.size() != 0)
+	if (participatingChannelName.size() != 0)
 	{
 		std::vector<std::string>::iterator participatingChannelNameIt = participatingChannelName.begin();
 		std::set<int> fdList;
@@ -125,7 +125,7 @@ void		Command::join(std::vector<std::string> s, Client *client)
 		makeNumericReply(client->getClientFd(), ERR_NEEDMOREPARAMS, " Not enough parameters");
 		return ;
 	}
-	std::vector<std::stirng> joinChannel = split(s[1], ",");
+	std::vector<std::string> joinChannel = split(s[1], ",");
 	std::vector<std::string>::iterator it = joinChannel.begin();
 	while (it != joinChannel.end())
 	{
@@ -161,7 +161,7 @@ void	Command::kick(std::vector<std::string> s, Client *client)
 	std::vector<std::string>::iterator channelNameIt = channelNames.begin();
 	while (channelNameIt != channelNames.end())
 	{
-		channel *channel = _server->findChannel(*channelNameIt);
+		Channel *channel = _server->findChannel(*channelNameIt);
 		if (channel == NULL)
 			makeNumericReply(client->getClientFd(), ERR_NOSUCHCHANNEL, *channelNameIt + " :No such channel");
 		else
@@ -171,7 +171,7 @@ void	Command::kick(std::vector<std::string> s, Client *client)
 			Client *kickedClient;
 			while (kickedUserNickNameIt != kickedUserNickName.end())
 			{
-				kickedClient = _server->findClient(*ickedUserNickNameIt);
+				kickedClient = _server->findClient(*kickedUserNickNameIt);
 				if (kickedClient == NULL)
 					makeNumericReply(client->getClientFd(), "401", *kickedUserNickNameIt + " :No such nick/channel");
 				else
@@ -236,10 +236,11 @@ void	Command::privmsg(std::vector<std::string> s, Client *client)
 		}
 		targetNameIt++;
 	}
+}
 
 void	Command::notice(std::vector<std::string> s, Client *client)
 {
-	Client *receiver = server->findClient(s[1]);
+	Client *receiver = _server->findClient(s[1]);
 	if (receiver != NULL)
 		receiver->appendMsgBuffer(makeFullname(client->getClientFd()) + " NOTICE " + receiver->getNickName() + " " + appendStringColon(2, s) + "\r\n");
 }
@@ -254,11 +255,11 @@ void	Command::makePrivMessage(Client *client, std::string senderName, std::strin
 void	Command::channelMessage(std::string msg, Client *client, Channel *channel)
 {
 	std::vector<int> clientInChannel = channel->getMyClientFdList();
-	std::vector<int>::iterator clientInChannelIt = clientsInChannel.begin();
+	std::vector<int>::iterator clientInChannelIt = clientInChannel.begin();
 	while (clientInChannelIt != clientInChannel.end())
 	{
-		if (client->getClientFd() != *clientsInChannelIt)
-			makePrivMessage(_server->findClent(*clientInChannelIt, client->getNickName(),
+		if (client->getClientFd() != *clientInChannelIt)
+			makePrivMessage(_server->findClient(*clientInChannelIt), client->getNickName(),
 						channel->getChannelName(), msg);
 		clientInChannelIt++;
 	}
@@ -266,7 +267,7 @@ void	Command::channelMessage(std::string msg, Client *client, Channel *channel)
 
 void	Command::part(std::vector<std::string> s, Client *client)
 {
-	if (s.sizr() < 2)
+	if (s.size() < 2)
 	{
 		makeNumericReply(client->getClientFd(), ERR_NEEDMOREPARAMS, " :Not enough paramerters");
 		return ;
@@ -275,14 +276,14 @@ void	Command::part(std::vector<std::string> s, Client *client)
 	std::vector<std::string>::iterator partChannelIt = partChannel.begin();
 	while (partChannelIt != partChannel.end())
 	{
-		std::vector<std::string>::iterator searchChannelnNameIt = client->findMyChannelIt(*partChannelIt);
-		if (serachChannelName != client->getMychannelList().end())
+		std::vector<std::string>::iterator searchChannelNameIt = client->findMyChannelIt(*partChannelIt);
+		if (searchChannelNameIt != client->getMyChannelList().end())
 		{
-			allInChannelMsg(client->getClientFd(), *searchChannelNameIt, "PART" appendStringColon(2, s));
+			allInChannelMsg(client->getClientFd(), *searchChannelNameIt, "PART", appendStringColon(2, s));
 			Channel *tmp = _server->findChannel(*partChannelIt);
 			tmp->removeClientList(client->getClientFd());
-			client->removeClientList(searchChannelNameIt);
-			if (tmp->getMyClientFdList().empty == true)
+			client->removeChannelList(searchChannelNameIt);
+			if (tmp->getMyClientFdList().empty() == true)
 			{
 				_server->getChannelList().erase(tmp->getChannelName());
 				delete tmp;
@@ -292,7 +293,7 @@ void	Command::part(std::vector<std::string> s, Client *client)
 		}
 		else
 		{
-			if (_server->getChannelList().find(*partChannelIt) == server->getChannelList().end())
+			if (_server->getChannelList().find(*partChannelIt) == _server->getChannelList().end())
 				makeNumericReply(client->getClientFd(), ERR_NOSUCHCHANNEL, *partChannelIt + " :No such channel");
 			else
 				makeNumericReply(client->getClientFd(), ERR_NOTONCHANNEL, *partChannelIt + " :You're not on that channel");

@@ -2,7 +2,7 @@
 #define CLIENT_HPP
 
 #include <vector>
-//#include "Channel.hpp"
+#include "Channel.hpp"
 
 #define PASS 1
 #define NICK 2
@@ -17,7 +17,7 @@ class Client
 		std::string _nickName;
 		std::string _userName;
 		std::string _hostName;
-		std::stirng _serverName;
+		std::string _serverName;
 		std::string _realName;
 		int _clientFd;
 		unsigned char _regist;
@@ -33,10 +33,10 @@ class Client
 		void appendRecvBuffer(std::string recvBuffer);
 		void clearMsgBuffer();
 		void clearRecvBuffer();
-		void setUser(std::string userName, std::string hostName, std::string serverName);
+		void setUser(std::string userName, std::string hostName, std::string serverName, std::string realName);
 		void setNickName(std::string nickName);
 		void setRegist(int bit);
-		int get ClientFd();
+		int getClientFd();
 		unsigned char getRegist();
 		std::string getMsgBuffer();
 		std::string getNickName();
@@ -45,13 +45,11 @@ class Client
 		std::string getServerName();
 		std::string getRealName();
 		std::string &getRecvBuffer();
-		std::vecotr<std::string> &getMyChannelList();
+		std::vector<std::string> &getMyChannelList();
 		void addChannelList(std::string channelName);
+		void removeChannelList(std::vector<std::string>::iterator it);
 		void removeChannel(std::string serverName);
 		std::vector<std::string>::iterator findMyChannelIt(std::string item);
 };
 
 #endif
-
-
-}

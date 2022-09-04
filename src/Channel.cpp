@@ -24,7 +24,7 @@ void			Channel::setMyOperator(int fd)
 	return ;
 }
 
-std::string		getChannelName()
+std::string		Channel::getChannelName()
 {
 	return _channelName;
 }

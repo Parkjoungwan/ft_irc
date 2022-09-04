@@ -28,10 +28,11 @@ class Command
 		bool	isLetter(char c);
 		bool	isNumber(char c);
 		bool	isSpecial(char c);
-		bool	isDuplication(char c);
+		bool	isDuplication(std::string s, std::map<int, Client *> clientList);
 		bool	nickValidate(std::string s);
+		void	makePrivMessage(Client *client, std::string senderName, std::string receiver, std::string msg);
 
-		void	channelMessage(std::string msg, Client *client, Chnnel *channel);
+		void	channelMessage(std::string msg, Client *client, Channel *channel);
 		std::string makeFullname(int fd);
 		void welcomeMsg(int fd, std::string flag, std::string msg, std::string name);
 		void allInChannelMsg(int target, std::string channelName, std::string command, std::string msg);
@@ -48,7 +49,7 @@ class Command
 		void	kick(std::vector<std::string> s, Client *client);
 		void	privmsg(std::vector<std::string> s, Client *client);
 		void	notice(std::vector<std::string> s, Client *client);
-		void	part(std::vector<std::stinrg> s, Client *client);
+		void	part(std::vector<std::string> s, Client *client);
 		void	quit(std::vector<std::string> s, Client *client);
 		void welcome(std::vector<std::string> cmd, Client *client, std::map<int, Client *> clientList);
 		void alreadyRegist(Client *client);

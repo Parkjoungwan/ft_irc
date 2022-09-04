@@ -63,8 +63,8 @@ int	Server::sock_init()
 		_serverSocketAddr.sin_zero[i] = 0;
 
 	int			optval = true;
-	socklen_T	optlen = sizeof(optval);
-	setsockopt(_serverSocketFd, SOL_SOCKET, SO_REUSEADDR, (void *)optval, optlen);
+	socklen_t	optlen = sizeof(optval);
+	setsockopt(_serverSocketFd, SOL_SOCKET, SO_REUSEADDR, (void *)&optval, optlen);
 	
 	if (bind(_serverSocketFd, (const sockaddr *)&_serverSocketAddr, sizeof(_serverSocketAddr)) == -1)
 	{
@@ -82,7 +82,7 @@ int	Server::sock_init()
 
 void	Server::relayEvent()
 {
-	char	buff[512];
+	char	buf[512];
 	for (int i = 1; i <= _maxClient; i++)
 	{
 		if (_pollClient[i].fd < 0)
@@ -109,7 +109,7 @@ void	Server::relayEvent()
 				std::cout << "pollfd: " << _pollClient[i].fd << std::endl;
 				std::cout << "--- endRecvMsgBuf ---" << std::endl;
 				
-				if (tmp->getRecvBuffer.find("\r\n") == std::string::npos)
+				if (tmp->getRecvBuffer().find("\r\n") == std::string::npos)
 					continue;
 				std::vector<std::string> cmd = split(tmp->getRecvBuffer(), "\r\n");
 				if (cmd[0] == "")
@@ -236,7 +236,7 @@ int		Server::execute()
 	while (1)
 	{
 		_pollLet = poll(_pollClient, _maxClient + 1, -1);
-		if (pollLet == 0 || _pollLet == -1)
+		if (_pollLet == 0 || _pollLet == -1)
 		{
 			std::cerr << "Error: fail to poll" << std::endl;
 			break ;

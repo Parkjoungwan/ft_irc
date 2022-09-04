@@ -25,6 +25,7 @@ std::vector<std::string>::iterator	Client::findMyChannelIt(std::string item)
 void	Client::removeChannelList(std::vector<std::string>::iterator it)
 {
 	_myChannelList.erase(it);
+	return ;
 }
 
 void	Client::removeChannel(std::string serverName)
@@ -45,7 +46,7 @@ void	Client::clearMsgBuffer()
 	_msgBuffer = "";
 }
 
-void	Client::appenMsgBuffer(std::string msgBuffer)
+void	Client::appendMsgBuffer(std::string msgBuffer)
 {
 	_msgBuffer.append(msgBuffer);
 }
@@ -74,7 +75,7 @@ std::string	&Client::getRecvBuffer()
 
 int Client::getClientFd()
 {
-	return _ClientFd;
+	return _clientFd;
 }
 
 void	Client::addChannelList(std::string channelName)
@@ -84,7 +85,7 @@ void	Client::addChannelList(std::string channelName)
 
 void	Client::setNickName(std::string nickName)
 {
-	_nickName = nickname;
+	_nickName = nickName;
 }
 
 std::string	Client::getNickName()
@@ -112,12 +113,12 @@ std::string Client::getHostName()
 
 std::string Client::getServerName()
 {
-	return _serverName();
+	return _serverName;
 }
 
 std::string	Client::getRealName()
 {
-	return _realName();
+	return _realName;
 }
 
 void Client::setRegist(int bit)

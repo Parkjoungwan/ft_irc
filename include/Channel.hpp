@@ -24,5 +24,7 @@ class Channel
 		std::vector<int>	getMyClientFdList();
 		void			addMyClientList(int fd);
 		void			removeClientList(int fd);
-		std::vecotr<int>::iterator	findMyClientIt(int fd);
+		std::vector<int>::iterator	findMyClientIt(int fd);
 };
+
+#endif

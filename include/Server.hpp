@@ -28,12 +28,12 @@ class Server
 		int	_maxClient;
 		int	_clientFd;
 		std::string _password;
-		socklen_t	_cliientLen;
-		sockaddr_in	_serverSocketaddr;
+		socklen_t	_clientLen;
+		sockaddr_in	_serverSocketAddr;
 		sockaddr_in	_clientAddr;
 		pollfd		_pollClient[OPEN_MAX];
 		std::map<std::string, Channel *>	_channelList;
-		std::map<int, Client *>				_ClientList;
+		std::map<int, Client *>				_clientList;
 		Command								_command;
 
 		int		pollingEvent();
