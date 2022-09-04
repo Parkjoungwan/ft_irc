@@ -1,6 +1,19 @@
 #include <fcntl.h>
 #include "../include/Server.hpp"
 
+template <class T1, class T2>
+void deleteMap(std::map<T1, T2> &map){
+	typename std::map<T1, T2>::iterator it1 = map.begin();
+	typename std::map<T1, T2>::iterator it2 = it1;
+
+	while (it1 != map.end())
+	{
+		it1++;
+		delete it2->second;
+		it2 = it1;
+	}
+};
+
 Server::Server(int port, std::string password) : _command(this)
 {
 	_pollLet = 0;
@@ -14,6 +27,16 @@ Server::Server(int port, std::string password) : _command(this)
 	_pollClient[0].events = POLLIN;
 	for (int i = 1; i < OPEN_MAX; i++)
 		_pollClient[i].fd = -1;
+}
+
+Server::~Server(){
+	std::cout << "server destructer called\n";
+	std::map<int, Client *>::iterator it = _clientList.begin();
+	for(; it != _clientList.end(); it++){
+		close(it->first);
+	}
+	deleteMap(_clientList);
+	deleteMap(_channelList);
 }
 
 int	Server::pollingEvent()
@@ -210,6 +233,12 @@ Client	*Server::findClient(std::string nick)
 	return NULL;
 }
 
+Channel* Server::findChannel(std::string name) {
+	if (_channelList.find(name) == _channelList.end())
+		return NULL;
+	return _channelList.find(name)->second;
+}
+
 void	Server::addChannelList(std::string channelName, int fd)
 {
 	_channelList.insert(std::pair<std::string, Channel *>(channelName, new Channel(channelName, fd)));
@@ -251,3 +280,4 @@ int		Server::execute()
 	close(_serverSocketFd);
 	return (0);
 }
+
