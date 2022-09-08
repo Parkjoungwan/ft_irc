@@ -31,7 +31,8 @@ Server::Server(int port, std::string password) : _command(this)
 
 Server::~Server(){
 	std::cout << "server destructer called\n";
-	std::map<int, Client *>::iterator it = _clientList.begin();
+	std::map<int, Client *>::iterator it = _clientList.begin();	
+	close(_serverSocketFd);
 	for(; it != _clientList.end(); it++){
 		close(it->first);
 	}
@@ -79,6 +80,12 @@ int	Server::pollingEvent()
 int	Server::sock_init()
 {
 	_serverSocketFd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+	if (_serverSocketFd == -1)
+	{
+		std::cerr << "Error: fail to socket" << std::endl;
+		exit(1);
+	}
 	_serverSocketAddr.sin_family = AF_INET;
 	_serverSocketAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	_serverSocketAddr.sin_port = htons(_port);
@@ -110,7 +117,7 @@ void	Server::relayEvent()
 	{
 		if (_pollClient[i].fd < 0)
 			continue;
-		if (_pollClient[i].revents & (POLLIN))
+		if (_pollClient[i].revents == POLLIN)
 		{
 			memset(buf, 0x00, 512);
 			//recv data
@@ -154,7 +161,7 @@ void	Server::relayEvent()
 				}
 			}
 		}
-		else if (_pollClient[i].revents & POLLERR)
+		else if (_pollClient[i].revents == POLLERR)
 		{
 			std::cerr << "Error: fail to poll" << std::endl;
 			exit(1);
@@ -270,14 +277,13 @@ int		Server::execute()
 			std::cerr << "Error: fail to poll" << std::endl;
 			break ;
 		}
-		if (_pollClient[0].revents & POLLIN)
+		if (_pollClient[0].revents == POLLIN)
 		{
 			if (pollingEvent() == -1)
 				continue;
 		}
 		relayEvent();
 	}
-	close(_serverSocketFd);
 	return (0);
 }
 
