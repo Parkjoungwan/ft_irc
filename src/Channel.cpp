@@ -4,7 +4,6 @@ Channel::Channel(std::string channelName, int fd) : _operator(fd), _channelName(
 
 Channel::~Channel() {};
 
-//매개변수 fd와 같은 fd를 갖는 클라이언트가 채널 내에 있는지 확인
 bool			Channel::checkClientInChannel(int fd)
 {
 	std::vector<int>::iterator it = findMyClientIt(fd);

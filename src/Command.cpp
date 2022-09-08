@@ -126,10 +126,10 @@ void		Command::join(std::vector<std::string> s, Client *client)
 		return ;
 	}
 	std::vector<std::string> joinChannel = split(s[1], ",");
-	std::vector<std::string>::iterator it = joinChannel.begin();
-	while (it != joinChannel.end())
+	std::vector<std::string>::iterator joinChannelIt = joinChannel.begin();
+	while (joinChannelIt != joinChannel.end())
 	{
-		std::map<std::string, Channel *>::iterator findChannelIt = _server->getChannelList().find(*it);
+		std::map<std::string, Channel *>::iterator findChannelIt = _server->getChannelList().find(*joinChannelIt);
 		if (findChannelIt != _server->getChannelList().end())
 		{
 			std::string channelName = (*findChannelIt).second->getChannelName();
@@ -139,13 +139,13 @@ void		Command::join(std::vector<std::string> s, Client *client)
 		}
 		else
 		{
-			_server->addChannelList(*it, client->getClientFd());
-			_server->findChannel(*it)->addMyClientList(client->getClientFd());
-			client->addChannelList(*it);
-			allInChannelMsg(client->getClientFd(), *it, "JOIN", "");
+			_server->addChannelList(*joinChannelIt, client->getClientFd());
+			_server->findChannel(*joinChannelIt)->addMyClientList(client->getClientFd());
+			client->addChannelList(*joinChannelIt);
+			allInChannelMsg(client->getClientFd(), *joinChannelIt, "JOIN", "");
 		}
-		nameListMsg(client->getClientFd(), *it);
-		it++;
+		nameListMsg(client->getClientFd(), *joinChannelIt);
+		joinChannelIt++;
 	}
 }
 
@@ -348,46 +348,46 @@ void Command::welcomeMsg(int fd, std::string flag, std::string msg, std::string 
 	tmp->appendMsgBuffer("\r\n");
 }
 
-void Command::allInChannelMsg(int target, std::string channelName, std::string command, std::string msg)
+void Command::allInChannelMsg(int sendClient, std::string channelName, std::string command, std::string msg)
 {
 	Channel *channelPtr = _server->findChannel(channelName);
 	std::vector<int> myClientList = channelPtr->getMyClientFdList();
-	std::vector<int>::iterator It = myClientList.begin();
-	for(; It < myClientList.end(); It++)
+	std::vector<int>::iterator myClientListIt = myClientList.begin();
+	for(; myClientListIt < myClientList.end(); myClientListIt++)
 	{
-		Client *tmp = _server->findClient(*It);
-		tmp->appendMsgBuffer(makeFullname(target) + " " + command + " " + channelName + " " + msg + "\r\n");
+		Client *recvClient = _server->findClient(*myClientListIt);
+		recvClient->appendMsgBuffer(makeFullname(sendClient) + " " + command + " " + channelName + " " + msg + "\r\n");
 	}
 }
 
 void Command::nameListMsg(int fd, std::string channelName)
 {
-	Client *tmp = _server->findClient(fd);
-	tmp->appendMsgBuffer(RPL_NAMREPLY);
-	tmp->appendMsgBuffer(" ");
-	tmp->appendMsgBuffer(tmp->getNickName());
-	tmp->appendMsgBuffer(" = " + channelName);
+	Client *recvClient = _server->findClient(fd);
+	recvClient->appendMsgBuffer(RPL_NAMREPLY);
+	recvClient->appendMsgBuffer(" ");
+	recvClient->appendMsgBuffer(recvClient->getNickName());
+	recvClient->appendMsgBuffer(" = " + channelName);
 	Channel *channelPtr = _server->findChannel(channelName);
 	std::vector<int> clientList = channelPtr->getMyClientFdList();
 	std::vector<int>::iterator clientListIt = clientList.begin();
 	std::string name;
-	tmp->appendMsgBuffer(" :");
+	recvClient->appendMsgBuffer(" :");
 	for (; clientListIt < clientList.end() - 1; clientListIt++)
 	{
 		if (channelPtr->getMyOperator() == *clientListIt)
-			tmp->appendMsgBuffer("@");
+			recvClient->appendMsgBuffer("@");
 		name = (_server->findClient(*clientListIt))->getNickName();
-		tmp->appendMsgBuffer(name);
-		tmp->appendMsgBuffer(" ");
+		recvClient->appendMsgBuffer(name);
+		recvClient->appendMsgBuffer(" ");
 	}
 	if (channelPtr->getMyOperator() == *clientListIt)
-		tmp->appendMsgBuffer("@");
+		recvClient->appendMsgBuffer("@");
 	name = (_server->findClient(*clientListIt))->getNickName();
-	tmp->appendMsgBuffer(name);
-	tmp->appendMsgBuffer("\r\n");
+	recvClient->appendMsgBuffer(name);
+	recvClient->appendMsgBuffer("\r\n");
 
-	tmp->appendMsgBuffer(RPL_ENDOFNAMES);
-	tmp->appendMsgBuffer(" " + tmp->getNickName() +  " " + channelName + " :End of NAMES list" + "\r\n");
+	recvClient->appendMsgBuffer(RPL_ENDOFNAMES);
+	recvClient->appendMsgBuffer(" " + recvClient->getNickName() +  " " + channelName + " :End of NAMES list" + "\r\n");
 }
 
 
