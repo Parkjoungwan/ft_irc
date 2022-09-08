@@ -110,7 +110,7 @@ void	Server::relayEvent()
 	{
 		if (_pollClient[i].fd < 0)
 			continue;
-		if (_pollClient[i].revents & (POLLIN))
+		if (_pollClient[i].revents == (POLLIN))
 		{
 			memset(buf, 0x00, 512);
 			//recv data

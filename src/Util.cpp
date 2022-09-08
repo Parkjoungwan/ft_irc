@@ -3,7 +3,7 @@
 void						print_stringVector(std::vector<std::string> v)
 {
 	std::vector<std::string>::iterator it = v.begin();
-	std::cout << "---in string vecotr---" << std::endl;
+	std::cout << "---in string vector---" << std::endl;
 	while (it != v.end())
 	{
 		std::cout << "[" << (*it) << "]" << std::endl;
