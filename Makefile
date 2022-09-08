@@ -1,7 +1,7 @@
 NAME = ircserv
 
-CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98
+CPP = c++
+CPPFLAGS = -std=c++98 -Wall -Wextra -Werror
 INC = -Iinclude/
 
 SRC_DIR = src/
@@ -17,14 +17,13 @@ SRCS = $(addprefix $(SRC_DIR), $(SRC_NAME))
 
 OBJS = $(SRCS:.cpp=.o)
 
-.cpp.o :
-	$(CXX) $(CXXFLAGS) $(INC) -c $< -o $@
-
-
 all : $(NAME)
 
 $(NAME) : $(OBJS)
-		$(CXX) $(CXXFLAGS) $(INC) $(OBJS) -o $(NAME)
+		$(CPP) $(CPPFLAGS) $(INC) $(OBJS) -o $(NAME)
+
+.cpp.o :
+	$(CPP) $(CPPFLAGS) $(INC) -c $< -o $(<:.cpp=.o)
 
 clean :
 		rm -rf $(OBJS)
