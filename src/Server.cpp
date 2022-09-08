@@ -144,6 +144,7 @@ void	Server::relayEvent()
 				std::vector<std::string> cmd = split(tmp->getRecvBuffer(), "\r\n");
 				if (cmd[0] == "")
 					continue;
+				//Print Msg(Command) from Client
 				print_stringVector(cmd);
 
 				if (!(tmp->getRegist() & REGI))
@@ -167,6 +168,7 @@ void	Server::relayEvent()
 			exit(1);
 		}
 	}
+	//Send Msg to Client.
 	std::map<int, Client *>::iterator it = _clientList.begin();
 	for (; it != _clientList.end(); it++)
 	{
