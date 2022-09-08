@@ -131,23 +131,23 @@ void	Server::relayEvent()
 			}
 			else
 			{
-				Client	*tmp = (_clientList.find(_pollClient[i].fd))->second;
-				tmp->appendRecvBuffer(std::string(buf));
+				Client	*targetClient = (_clientList.find(_pollClient[i].fd))->second;
+				targetClient->appendRecvBuffer(std::string(buf));
 				
 				std::cout << "---- recvMsgBuf ----" << std::endl;
-				std::cout << "[" << tmp->getRecvBuffer() << "]" << std::endl;
+				std::cout << "[" << targetClient->getRecvBuffer() << "]" << std::endl;
 				std::cout << "pollfd: " << _pollClient[i].fd << std::endl;
 				std::cout << "--- endRecvMsgBuf ---" << std::endl;
 				
-				if (tmp->getRecvBuffer().find("\r\n") == std::string::npos)
+				if (targetClient->getRecvBuffer().find("\r\n") == std::string::npos)
 					continue;
-				std::vector<std::string> cmd = split(tmp->getRecvBuffer(), "\r\n");
+				std::vector<std::string> cmd = split(targetClient->getRecvBuffer(), "\r\n");
 				if (cmd[0] == "")
 					continue;
 				//Print Msg(Command) from Client
 				print_stringVector(cmd);
 
-				if (!(tmp->getRegist() & REGI))
+				if (!(targetClient->getRegist() & REGI))
 					_command.welcome(cmd, (_clientList.find(_pollClient[i].fd))->second, _clientList);
 				else
 				{
@@ -155,10 +155,10 @@ void	Server::relayEvent()
 					while (cmd_it != cmd.end())
 					{
 						std::vector<std::string> result = split(*cmd_it, " ");
-						check_cmd(result, tmp);
+						check_cmd(result, targetClient);
 						cmd_it++;
 					}
-					tmp->getRecvBuffer().clear();
+					targetClient->getRecvBuffer().clear();
 				}
 			}
 		}
@@ -255,18 +255,18 @@ void	Server::addChannelList(std::string channelName, int fd)
 
 void	Server::removeUnconnectClient(int fd)
 {
-	Client	*tmp = findClient(fd);
+	Client	*targetClient = findClient(fd);
 
-	std::string str = tmp->getMsgBuffer();
+	std::string str = targetClient->getMsgBuffer();
 	send(fd, str.c_str(), str.length(), 0);
 
 	std::cout << "remove client Msg to <" << fd << ">" << std::endl;
 	std::cout << str << std::endl;
 	str.clear();
-	tmp->clearMsgBuffer();
+	targetClient->clearMsgBuffer();
 	getClientList().erase(fd);
 	close(fd);
-	delete tmp;
+	delete targetClient;
 }
 
 int		Server::execute()

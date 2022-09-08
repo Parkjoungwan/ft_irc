@@ -109,8 +109,8 @@ void	Command::nick(std::vector<std::string> s, Client *client)
 		std::set<int>::iterator fdsIt = fdList.begin();
 		while (fdsIt != fdList.end())
 		{
-			Client *tmp = _server->findClient(*fdsIt);
-			tmp->appendMsgBuffer(":" + client->getNickName() + " NICK" + s[1] + "\r\n");
+			Client *recvClient = _server->findClient(*fdsIt);
+			recvClient->appendMsgBuffer(":" + client->getNickName() + " NICK" + s[1] + "\r\n");
 			fdsIt++;
 		}
 		fdList.clear();
@@ -280,16 +280,16 @@ void	Command::part(std::vector<std::string> s, Client *client)
 		if (searchChannelNameIt != client->getMyChannelList().end())
 		{
 			allInChannelMsg(client->getClientFd(), *searchChannelNameIt, "PART", appendStringColon(2, s));
-			Channel *tmp = _server->findChannel(*partChannelIt);
-			tmp->removeClientList(client->getClientFd());
+			Channel *targetChannel = _server->findChannel(*partChannelIt);
+			targetChannel->removeClientList(client->getClientFd());
 			client->removeChannelList(searchChannelNameIt);
-			if (tmp->getMyClientFdList().empty() == true)
+			if (targetChannel->getMyClientFdList().empty() == true)
 			{
-				_server->getChannelList().erase(tmp->getChannelName());
-				delete tmp;
+				_server->getChannelList().erase(targetChannel->getChannelName());
+				delete targetChannel;
 			}
 			else
-				tmp->setMyOperator(*(tmp->getMyClientFdList().begin()));
+				targetChannel->setMyOperator(*(targetChannel->getMyClientFdList().begin()));
 		}
 		else
 		{
@@ -307,17 +307,17 @@ void Command::quit(std::vector<std::string> s, Client *client)
 	std::vector<std::string>::iterator channelListInClientClassIt = client->getMyChannelList().begin();
  	while (channelListInClientClassIt != client->getMyChannelList().end())
     {
-        Channel *tmp = _server->findChannel(*channelListInClientClassIt);
-        tmp->removeClientList(client->getClientFd());
-		allInChannelMsg(client->getClientFd(), tmp->getChannelName(), "PART", appendStringColon(1,s));
-        if (tmp->getMyClientFdList().empty() == true)
+        Channel *targetChannel = _server->findChannel(*channelListInClientClassIt);
+        targetChannel->removeClientList(client->getClientFd());
+		allInChannelMsg(client->getClientFd(), targetChannel->getChannelName(), "PART", appendStringColon(1,s));
+        if (targetChannel->getMyClientFdList().empty() == true)
         {
-            _server->getChannelList().erase(tmp->getChannelName());
-            delete tmp;
+            _server->getChannelList().erase(targetChannel->getChannelName());
+            delete targetChannel;
         }
 		else
 		{
-			tmp->setMyOperator(*(tmp->getMyClientFdList().begin()));
+			targetChannel->setMyOperator(*(targetChannel->getMyClientFdList().begin()));
 		}
         channelListInClientClassIt++;
     }
@@ -329,23 +329,23 @@ void Command::quit(std::vector<std::string> s, Client *client)
 
 std::string Command::makeFullname(int fd)
 {
-	Client *tmp = _server->findClient(fd);
-	std::string test = (":" + tmp->getNickName() + "!" + tmp->getUserName() + "@" + tmp->getServerName());
+	Client *targetClient = _server->findClient(fd);
+	std::string test = (":" + targetClient->getNickName() + "!" + targetClient->getUserName() + "@" + targetClient->getServerName());
 	return (test);
 
 };
 
 void Command::welcomeMsg(int fd, std::string flag, std::string msg, std::string name)
 {
-	Client *tmp = _server->findClient(fd);
-	tmp->appendMsgBuffer(flag);
-	tmp->appendMsgBuffer(" ");
-	tmp->appendMsgBuffer(name);
-	tmp->appendMsgBuffer(" ");
-	tmp->appendMsgBuffer(msg);
-	tmp->appendMsgBuffer(" ");
-	tmp->appendMsgBuffer(name);
-	tmp->appendMsgBuffer("\r\n");
+	Client *targetClient = _server->findClient(fd);
+	targetClient->appendMsgBuffer(flag);
+	targetClient->appendMsgBuffer(" ");
+	targetClient->appendMsgBuffer(name);
+	targetClient->appendMsgBuffer(" ");
+	targetClient->appendMsgBuffer(msg);
+	targetClient->appendMsgBuffer(" ");
+	targetClient->appendMsgBuffer(name);
+	targetClient->appendMsgBuffer("\r\n");
 }
 
 void Command::allInChannelMsg(int sendClient, std::string channelName, std::string command, std::string msg)
@@ -394,25 +394,25 @@ void Command::nameListMsg(int fd, std::string channelName)
 
 void Command::makeNumericReply(int fd, std::string flag, std::string str)
 {
-	Client *tmp = _server->findClient(fd);
-	tmp->appendMsgBuffer(flag);
-	tmp->appendMsgBuffer(" ");
-	tmp->appendMsgBuffer(tmp->getNickName());
-	tmp->appendMsgBuffer(" ");
-	tmp->appendMsgBuffer(str);
-	tmp->appendMsgBuffer("\r\n");
+	Client *targetClient = _server->findClient(fd);
+	targetClient->appendMsgBuffer(flag);
+	targetClient->appendMsgBuffer(" ");
+	targetClient->appendMsgBuffer(targetClient->getNickName());
+	targetClient->appendMsgBuffer(" ");
+	targetClient->appendMsgBuffer(str);
+	targetClient->appendMsgBuffer("\r\n");
 }
 
 void Command::makeCommandReply(int fd, std::string command, std::string str)
 {
-	Client *tmp = _server->findClient(fd);
-	tmp->appendMsgBuffer(":");
-	tmp->appendMsgBuffer(tmp->getNickName());
-	tmp->appendMsgBuffer(" ");
-	tmp->appendMsgBuffer(command);
-	tmp->appendMsgBuffer(" ");
-	tmp->appendMsgBuffer(str);
-	tmp->appendMsgBuffer("\r\n");
+	Client *targetClient = _server->findClient(fd);
+	targetClient->appendMsgBuffer(":");
+	targetClient->appendMsgBuffer(targetClient->getNickName());
+	targetClient->appendMsgBuffer(" ");
+	targetClient->appendMsgBuffer(command);
+	targetClient->appendMsgBuffer(" ");
+	targetClient->appendMsgBuffer(str);
+	targetClient->appendMsgBuffer("\r\n");
 }
 
 void Command::welcome(std::vector<std::string> cmd, Client *client, std::map<int, Client *> clientList)
