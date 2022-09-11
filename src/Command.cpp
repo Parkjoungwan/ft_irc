@@ -451,7 +451,7 @@ void Command::welcome(std::vector<std::string> cmd, Client *client, std::map<int
 				makeNumericReply(client->getClientFd(), ERR_ERRONEUSNICKNAME, result[1] + " :Erroneus Nickname");
 				return ;
 			}
-			if (isDuplication(result[1], clientList))
+			while (isDuplication(result[1], clientList))
 			{
 				if (client->getNickName() == result[1])
 					return;

@@ -162,10 +162,16 @@ void	Server::relayEvent()
 				}
 			}
 		}
-		else if (_pollClient[i].revents == POLLERR)
+		else if (_pollClient[i].revents & POLLERR)
 		{
 			std::cerr << "Error: fail to poll" << std::endl;
 			exit(1);
+		}
+		else if (_pollClient[i].revents & POLLHUP)
+		{
+			std::cerr << "Error: fail to connected" << std::endl;
+			removeUnconnectClient(_pollClient[i].fd);
+			_pollClient[i].fd = -1;
 		}
 	}
 	//Send Msg to Client.
@@ -279,7 +285,7 @@ int		Server::execute()
 			std::cerr << "Error: fail to poll" << std::endl;
 			break ;
 		}
-		if (_pollClient[0].revents == POLLIN)
+		if (_pollClient[0].revents & POLLIN)
 		{
 			if (pollingEvent() == -1)
 				continue;
