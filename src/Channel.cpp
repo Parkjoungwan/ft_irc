@@ -1,6 +1,9 @@
 #include "../include/Channel.hpp"
 
-Channel::Channel(std::string channelName, int fd) : _operator(fd), _channelName(channelName) {};
+Channel::Channel(std::string channelName, int fd) : _channelName(channelName) 
+{
+	_operator.pushback(fd);
+};
 
 Channel::~Channel() {};
 
@@ -12,14 +15,18 @@ bool			Channel::checkClientInChannel(int fd)
 	return false;
 }
 
-int			Channel::getMyOperator()
+std::vector<int>		Channel::getMyOperator()
 {
 	return _operator;
 }
 
 void			Channel::setMyOperator(int fd)
 {
-	_operator = fd;
+	std::vector<int>::iterator it = find(_operator.begin(), _operator.end(), fd);
+
+	if (it != _operator.end())
+		return ;
+	_operator.pushback(fd);
 	return ;
 }
 
