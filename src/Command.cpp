@@ -177,7 +177,7 @@ void	Command::kick(std::vector<std::string> s, Client *client)
 				else
 				{
 					std::vector<int> operatorFd = channel->getMyOperator();
-					if (operatorFd.find(operatorFd.begin(), operatorFd.end(), client->getClientFd()) == operatorFd.end())
+					if (find(operatorFd.begin(), operatorFd.end(), client->getClientFd()) == operatorFd.end())
 
 						makeNumericReply(client->getClientFd(), ERR_CHANOPRIVSNEEDED, *channelNameIt + " :You're not channel operator");
 					else if (!channel->checkClientInChannel(kickedClient->getClientFd()))
@@ -289,8 +289,8 @@ void	Command::part(std::vector<std::string> s, Client *client)
 				_server->getChannelList().erase(targetChannel->getChannelName());
 				delete targetChannel;
 			}
-			else if (targetChannel->getmyoperator().empty() == true)
-				targetChannel->setMyOperator(*(targetChannel->getmyclientfdlist().begin()));
+			else if (targetChannel->getMyOperator().empty() == true)
+				targetChannel->setMyOperator(*(targetChannel->getMyClientFdList().begin()));
 		}
 		else
 		{
@@ -316,8 +316,8 @@ void Command::quit(std::vector<std::string> s, Client *client)
             _server->getChannelList().erase(targetChannel->getChannelName());
             delete targetChannel;
         }
-		else if (targetChannel->getMyoOerator().empty() == true)
-				targetChannel->setMyOperator(*(targetChannel->getmyclientfdlist().begin()));
+		else if (targetChannel->getMyOperator().empty() == true)
+				targetChannel->setMyOperator(*(targetChannel->getMyClientFdList().begin()));
         channelListInClientClassIt++;
     }
     _server->getClientList().erase(client->getClientFd());
@@ -371,15 +371,17 @@ void Command::nameListMsg(int fd, std::string channelName)
 	std::vector<int>::iterator clientListIt = clientList.begin();
 	std::string name;
 	recvClient->appendMsgBuffer(" :");
+
+	std::vector<int> operList = channelPtr->getMyOperator();
 	for (; clientListIt < clientList.end() - 1; clientListIt++)
 	{
-		if (channelPtr->getMyOperator().find(*clientListIt) != channelPtr->getMyOperator().end())
+		if (find(operList.begin(), operList.end(), *clientListIt) != operList.end())
 			recvClient->appendMsgBuffer("@");
 		name = (_server->findClient(*clientListIt))->getNickName();
 		recvClient->appendMsgBuffer(name);
 		recvClient->appendMsgBuffer(" ");
 	}
-	if (channelPtr->getMyOperator().find(*clientListIt) != channelPtr->getMyOperator().end())
+	if (find(operList.begin(), operList.end(), *clientListIt) != operList.end())
 		recvClient->appendMsgBuffer("@");
 	name = (_server->findClient(*clientListIt))->getNickName();
 	recvClient->appendMsgBuffer(name);
