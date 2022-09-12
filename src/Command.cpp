@@ -176,8 +176,9 @@ void	Command::kick(std::vector<std::string> s, Client *client)
 					makeNumericReply(client->getClientFd(), "401", *kickedUserNickNameIt + " :No such nick/channel");
 				else
 				{
-					int operatorFd = channel->getMyOperator();
-					if (operatorFd != client->getClientFd())
+					std::vector<int> operatorFd = channel->getMyOperator();
+					if (operatorFd.find(operatorFd.begin(), operatorFd.end(), client->getClientFd()) == operatorFd.end())
+
 						makeNumericReply(client->getClientFd(), ERR_CHANOPRIVSNEEDED, *channelNameIt + " :You're not channel operator");
 					else if (!channel->checkClientInChannel(kickedClient->getClientFd()))
 						makeNumericReply(client->getClientFd(), ERR_USERNOTINCHANNEL, *kickedUserNickNameIt + " " + *channelNameIt + " :They aren't on that channel");
@@ -194,7 +195,7 @@ void	Command::kick(std::vector<std::string> s, Client *client)
 							_server->getChannelList().erase(channel->getChannelName());
 							delete channel;
 						}
-						else
+						else if (channel->getMyOperator().empty() == true)
 							channel->setMyOperator(*(channel->getMyClientFdList().begin()));
 					}
 				}
@@ -288,8 +289,8 @@ void	Command::part(std::vector<std::string> s, Client *client)
 				_server->getChannelList().erase(targetChannel->getChannelName());
 				delete targetChannel;
 			}
-			else
-				targetChannel->setMyOperator(*(targetChannel->getMyClientFdList().begin()));
+			else if (targetChannel->getmyoperator().empty() == true)
+				targetChannel->setMyOperator(*(targetChannel->getmyclientfdlist().begin()));
 		}
 		else
 		{
@@ -315,10 +316,8 @@ void Command::quit(std::vector<std::string> s, Client *client)
             _server->getChannelList().erase(targetChannel->getChannelName());
             delete targetChannel;
         }
-		else
-		{
-			targetChannel->setMyOperator(*(targetChannel->getMyClientFdList().begin()));
-		}
+		else if (targetChannel->getMyoOerator().empty() == true)
+				targetChannel->setMyOperator(*(targetChannel->getmyclientfdlist().begin()));
         channelListInClientClassIt++;
     }
     _server->getClientList().erase(client->getClientFd());
@@ -374,13 +373,13 @@ void Command::nameListMsg(int fd, std::string channelName)
 	recvClient->appendMsgBuffer(" :");
 	for (; clientListIt < clientList.end() - 1; clientListIt++)
 	{
-		if (channelPtr->getMyOperator() == *clientListIt)
+		if (channelPtr->getMyOperator().find(*clientListIt) != channelPtr->getMyOperator().end())
 			recvClient->appendMsgBuffer("@");
 		name = (_server->findClient(*clientListIt))->getNickName();
 		recvClient->appendMsgBuffer(name);
 		recvClient->appendMsgBuffer(" ");
 	}
-	if (channelPtr->getMyOperator() == *clientListIt)
+	if (channelPtr->getMyOperator().find(*clientListIt) != channelPtr->getMyOperator().end())
 		recvClient->appendMsgBuffer("@");
 	name = (_server->findClient(*clientListIt))->getNickName();
 	recvClient->appendMsgBuffer(name);

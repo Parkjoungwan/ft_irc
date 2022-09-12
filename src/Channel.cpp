@@ -2,7 +2,7 @@
 
 Channel::Channel(std::string channelName, int fd) : _channelName(channelName) 
 {
-	_operator.pushback(fd);
+	_operator.push_back(fd);
 };
 
 Channel::~Channel() {};
@@ -26,7 +26,7 @@ void			Channel::setMyOperator(int fd)
 
 	if (it != _operator.end())
 		return ;
-	_operator.pushback(fd);
+	_operator.push_back(fd);
 	return ;
 }
 
@@ -49,7 +49,12 @@ void			Channel::removeClientList(int fd)
 {
 	std::vector<int>::iterator it = findMyClientIt(fd);
 	if (it != _myClientFdList.end())
+	{
 		_myClientFdList.erase(it);
+		std::vector<int>::iterator operIt = find(_operator.begin(), _operator.end(), fd);
+		if (operIt != _operator.end())
+			_operator.erase(operIt);
+	}
 }
 
 //매개변수 fd와 같은 fd를 갖는 클라이언트 객체를 반환
