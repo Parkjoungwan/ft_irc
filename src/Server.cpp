@@ -134,7 +134,7 @@ void	Server::relayEvent()
 				Client	*targetClient = (_clientList.find(_pollClient[i].fd))->second;
 				targetClient->appendRecvBuffer(std::string(buf));
 				
-				std::cout << "---- recvMsgBuf ----" << std::endl;
+				std::cout << "\n---- recvMsgBuf ----" << std::endl;
 				std::cout << "[" << targetClient->getRecvBuffer() << "]" << std::endl;
 				std::cout << "pollfd: " << _pollClient[i].fd << std::endl;
 				std::cout << "--- endRecvMsgBuf ---" << std::endl;
@@ -169,8 +169,10 @@ void	Server::relayEvent()
 		}
 		else if (_pollClient[i].revents & POLLHUP)
 		{
-			std::cerr << "Error: fail to connected" << std::endl;
-			removeUnconnectClient(_pollClient[i].fd);
+			std::vector<std::string> tmp_vec;
+			tmp_vec.push_back("QUIT");
+			tmp_vec.push_back(":lost connection");
+			_command.quit(tmp_vec, findClient(_pollClient[i].fd));
 			_pollClient[i].fd = -1;
 		}
 	}
@@ -182,7 +184,7 @@ void	Server::relayEvent()
 		{
 			std::string str = it->second->getMsgBuffer();
 			send(it->first, str.c_str(), str.length(), 0);
-			std::cout << "sendMsgs to <" << it->first << ">" << std::endl;
+			std::cout << "sendMsgs to fd: <" << it->first << ">" << std::endl;
 			std::cout << str << std::endl;
 			str.clear();
 			it->second->clearMsgBuffer();

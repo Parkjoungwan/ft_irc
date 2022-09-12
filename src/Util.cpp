@@ -9,7 +9,7 @@ void						print_stringVector(std::vector<std::string> v)
 		std::cout << "[" << (*it) << "]" << std::endl;
 		it++;
 	}
-	std::cout << "----------------------" << std::endl;
+	std::cout << "----------------------\n" << std::endl;
 }
 
 std::string					appendStringColon(size_t startIndex, std::vector<std::string> msg)
