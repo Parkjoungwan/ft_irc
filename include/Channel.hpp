@@ -10,15 +10,15 @@ class Client;
 class Channel
 {
 	private:
-		int			_operator;
-		std::string		_channelName;
+		std::vector<int>	_operator;
+		std::string			_channelName;
 		std::vector<int>	_myClientFdList;
 
 	public:
 		Channel(std::string channelName, int fd);
 		~Channel();
 		bool			checkClientInChannel(int fd);
-		int			getMyOperator();
+		std::vector<int>	getMyOperator();
 		void			setMyOperator(int fd);
 		std::string		getChannelName();
 		std::vector<int>	getMyClientFdList();
