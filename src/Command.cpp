@@ -370,9 +370,9 @@ void	Command::oper(std::vector<std::string> s, Client *client)
 					else
 					{
 						if (sLength > 4)
-							allInChannelMsg(client->getClientFd(), *channelNameIt, "MODE", *addedUserNickNameIt + " " + appendStringColon(4, s));
+							allInChannelMsg(client->getClientFd(), *channelNameIt, "MODE", *addedUserNickNameIt + " added to operators." + " " + appendStringColon(4, s));
 						else
-							allInChannelMsg(client->getClientFd(), *channelNameIt, "MODE", *addedUserNickNameIt);
+							allInChannelMsg(client->getClientFd(), *channelNameIt, "MODE", *addedUserNickNameIt + " added to operators.");
 						channel->setMyOperator(addedClient->getClientFd());
 					}
 				}
