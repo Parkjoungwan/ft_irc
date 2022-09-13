@@ -212,15 +212,8 @@ void	Server::check_cmd(std::vector<std::string> cmd_vec, Client *client)
 		_command.quit(cmd_vec, client);
 	else if (cmd_vec[0] == "PASS" || cmd_vec[0] == "USER")
 		_command.alreadyRegist(client);
-	else if (cmd_vec.size() == 4)
-	{
-		if (cmd_vec[0] == "MODE" && cmd_vec[2] == "+o")
-		{
-			Channel *ch = findChannel(cmd_vec[1]);
-			Client *cl = findClient(cmd_vec[3]);
-			ch->setMyOperator(cl->getClientFd());
-		}
-	}
+	else if (cmd_vec[0] == "MODE")
+		_command.oper(cmd_vec, client);
 	else
 		std::cout << cmd_vec[0] << ": undefined cmd\n\n";
 }

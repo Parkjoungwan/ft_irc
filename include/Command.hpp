@@ -51,8 +51,9 @@ class Command
 		void	notice(std::vector<std::string> s, Client *client);
 		void	part(std::vector<std::string> s, Client *client);
 		void	quit(std::vector<std::string> s, Client *client);
-		void welcome(std::vector<std::string> cmd, Client *client, std::map<int, Client *> clientList);
-		void alreadyRegist(Client *client);
+		void	oper(std::vector<std::string> s, Client *client);
+		void	welcome(std::vector<std::string> cmd, Client *client, std::map<int, Client *> clientList);
+		void	alreadyRegist(Client *client);
 };
 
 #endif

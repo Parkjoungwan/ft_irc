@@ -325,6 +325,63 @@ void Command::quit(std::vector<std::string> s, Client *client)
     delete client;
 }
 
+void	Command::oper(std::vector<std::string> s, Client *client)
+{
+	int sLength = s.size();
+	if (sLength > 2 && s[2] != "+o")
+	{
+		std::cout << s[0] << ": undefined cmd\n\n";
+		return;
+	}
+	if (sLength < 4)
+	{
+		makeNumericReply(client->getClientFd(), ERR_NEEDMOREPARAMS, "OP :Not enough parameters");
+		return;
+	}
+
+	std::vector<std::string> channelNames = split(s[1], ",");
+	std::vector<std::string>::iterator channelNameIt = channelNames.begin();
+	while (channelNameIt != channelNames.end())
+	{
+		Channel *channel = _server->findChannel(*channelNameIt);
+		if (channel == NULL)
+			makeNumericReply(client->getClientFd(), ERR_NOSUCHCHANNEL, *channelNameIt + " :No such channel");
+		else
+		{
+			std::vector<std::string> addedUserNickName = split(s[3], ",");
+			std::vector<std::string>::iterator addedUserNickNameIt = addedUserNickName.begin();	
+			Client *addedClient;
+			std::vector<int> operatorFd = channel->getMyOperator();
+			if (find(operatorFd.begin(), operatorFd.end(), client->getClientFd()) == operatorFd.end())
+			{
+				makeNumericReply(client->getClientFd(), ERR_CHANOPRIVSNEEDED, *channelNameIt + " :You're not channel operator");
+				channelNameIt++;
+				continue ;
+			}
+			while (addedUserNickNameIt != addedUserNickName.end())
+			{
+				addedClient = _server->findClient(*addedUserNickNameIt);
+				if (addedClient == NULL)
+					makeNumericReply(client->getClientFd(), "401", *addedUserNickNameIt + " :No such nick/channel");
+				else
+				{
+					if (!channel->checkClientInChannel(addedClient->getClientFd()))
+						makeNumericReply(client->getClientFd(), ERR_USERNOTINCHANNEL, *addedUserNickNameIt + " " + *channelNameIt + " :They aren't on that channel");
+					else
+					{
+						if (sLength > 4)
+							allInChannelMsg(client->getClientFd(), *channelNameIt, "MODE", *addedUserNickNameIt + " " + appendStringColon(4, s));
+						else
+							allInChannelMsg(client->getClientFd(), *channelNameIt, "MODE", *addedUserNickNameIt);
+						channel->setMyOperator(addedClient->getClientFd());
+					}
+				}
+				addedUserNickNameIt++;
+			}
+		}
+		channelNameIt++;
+	}
+}
 
 std::string Command::makeFullname(int fd)
 {
